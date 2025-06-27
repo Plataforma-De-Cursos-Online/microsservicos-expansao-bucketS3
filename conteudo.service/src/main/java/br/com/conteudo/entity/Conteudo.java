@@ -24,9 +24,5 @@ public class Conteudo {
 
     private String titulo;
 
-    private String video;
-
-    private String pdf;
-
-    private UUID idCursos;
+    private UUID idCurso;
 }

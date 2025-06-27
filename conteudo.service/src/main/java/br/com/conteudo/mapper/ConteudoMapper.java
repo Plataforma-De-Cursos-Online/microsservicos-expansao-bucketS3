@@ -10,18 +10,15 @@ public class ConteudoMapper {
     public CadastroConteudoDto toDto(Conteudo conteudo){
         return new CadastroConteudoDto(
                 conteudo.getTitulo(),
-                conteudo.getVideo(),
-                conteudo.getPdf(),
-                conteudo.getIdCursos()
+                conteudo.getIdCurso()
         );
     }
 
     public Conteudo toEntity(CadastroConteudoDto dto){
+
         Conteudo conteudo = new Conteudo();
         conteudo.setTitulo(dto.titulo());
-        conteudo.setVideo(dto.video());
-        conteudo.setPdf(dto.pdf());
-        conteudo.setIdCursos(dto.idCurso());
+        conteudo.setIdCurso(dto.idCurso());
 
         return conteudo;
     }

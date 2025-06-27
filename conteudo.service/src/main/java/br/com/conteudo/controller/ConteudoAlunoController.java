@@ -27,7 +27,4 @@ public class ConteudoAlunoController {
             throw new RuntimeException(e.getMessage());
         }
     }
-
-
-
 }
