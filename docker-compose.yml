@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: BD
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
