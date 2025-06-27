@@ -2,6 +2,7 @@ package br.com.conteudo.service;
 
 import br.com.conteudo.dto.CadastroConteudoDto;
 import br.com.conteudo.dto.ListagemUsuarioDTO;
+import br.com.conteudo.dto.UuidDto;
 import br.com.conteudo.entity.Conteudo;
 import br.com.conteudo.exception.ConteudoNaoEncontradoException;
 import br.com.conteudo.exception.CursoNaoEncontradoException;
@@ -12,10 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.sound.midi.MidiChannel;
+import java.io.IOException;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +41,9 @@ public class ConteudoService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private S3Client s3Client;
+
     private final WebClient webClient;
 
     public ConteudoService(WebClient webClient) {
@@ -43,19 +52,25 @@ public class ConteudoService {
 
 
 
-    public CadastroConteudoDto saveConteudo(CadastroConteudoDto dto) {
-       boolean verificarCurso = VerificarCurso(dto.idCurso());
+    public CadastroConteudoDto saveConteudo(MultipartFile file, UUID idCurso) throws IOException {
+       boolean verificarCurso = VerificarCurso(idCurso);
 
         if (verificarCurso == false){
             throw new CursoNaoEncontradoException("Curso com esse ID não existe!");
         }
 
         var conteudo = new Conteudo();
-        conteudo.setPdf(dto.pdf());
-        conteudo.setTitulo(dto.titulo());
-        conteudo.setVideo(dto.video());
-        conteudo.setIdCursos(dto.idCurso());
+        conteudo.setTitulo(file.getOriginalFilename());
+        conteudo.setIdCursos(idCurso);
         conteudoRepository.save(conteudo);
+
+        s3Client.putObject(
+                PutObjectRequest.builder()
+                        .bucket("materiais-bucket")
+                        .key(file.getOriginalFilename())
+                        .build(),
+                RequestBody.fromBytes(file.getBytes())
+        );
 
         return conteudoMapper.toDto(conteudo);
 
@@ -93,9 +108,7 @@ public class ConteudoService {
         }
 
         var conteudo = conteudoEncontrado.get();
-        conteudo.setPdf(dto.pdf());
         conteudo.setTitulo(dto.titulo());
-        conteudo.setVideo(dto.video());
         conteudo.setIdCursos(dto.idCurso());
         conteudoRepository.save(conteudo);
 
