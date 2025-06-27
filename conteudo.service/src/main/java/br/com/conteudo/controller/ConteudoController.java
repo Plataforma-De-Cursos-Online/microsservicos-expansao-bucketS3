@@ -1,13 +1,16 @@
 package br.com.conteudo.controller;
 
 import br.com.conteudo.dto.CadastroConteudoDto;
+import br.com.conteudo.dto.UuidDto;
 import br.com.conteudo.exception.CursoNaoEncontradoException;
 import br.com.conteudo.service.ConteudoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,9 +21,9 @@ public class ConteudoController {
     @Autowired
     private ConteudoService conteudoService;
 
-    @PostMapping
-    public ResponseEntity<CadastroConteudoDto> saveConteudo(@RequestBody @Valid CadastroConteudoDto dto){
-            var conteudo = conteudoService.saveConteudo(dto);
+    @PostMapping("/{idCurso}")
+    public ResponseEntity<CadastroConteudoDto> saveConteudo(@RequestParam("file") MultipartFile file, @PathVariable UUID idCurso) throws IOException {
+            var conteudo = conteudoService.saveConteudo(file, idCurso);
             return ResponseEntity.status(201).body(conteudo);
 
     }
